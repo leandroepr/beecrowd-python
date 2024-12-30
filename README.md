@@ -39,6 +39,7 @@ beecrowd_python/
 ├── src/
 │   ├── challenges/
 │   └── utils/
+│       └── solution_runner/
 ├── pyproject.toml
 ├── .gitignore
 └── README.md
@@ -48,3 +49,29 @@ beecrowd_python/
 
 -   Consolidar as soluções do Beecrowd em um único repositório organizado.
 -   Demonstrar boas práticas de programação, incluindo TDD e automação de testes.
+
+## Utilitários
+
+### Solution Runner
+
+O `SolutionRunner` é um utilitário que executa soluções Python em um ambiente isolado, fornecendo entradas e capturando saídas. É utilizado para garantir que cada solução funcione corretamente com diferentes casos de teste.
+
+#### Exemplo de Uso
+
+```python
+from src.utils.solution_runner import SolutionRunner
+
+runner = SolutionRunner("path_to_solution.py")
+
+# Executa a solução com entrada fornecida
+output = runner.run("5\n10\n")
+print(output)  # Exibe a saída gerada pela solução
+```
+
+#### Testes
+
+Testes automatizados garantem a funcionalidade do `SolutionRunner`. Para executá-los:
+
+```bash
+pytest src/utils/solution_runner/test_solution_runner.py
+```
