@@ -19,10 +19,6 @@ isort = "^5.13.2"
 line-length = 88
 target-version = ["py39"]
 
-[tool.flake8]
-max-line-length = 88
-exclude = ["build", "dist", ".venv", "__pycache__"]
-
 [tool.isort]
 profile = "black"
 
