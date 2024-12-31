@@ -6,44 +6,42 @@ from .solution_runner import SolutionRunner
 
 
 @pytest.fixture
-def solution_without_input():
+def create_temp_solution():
     """
-    Fixture to create a temporary solution that does not require input.
-
-    Returns:
-        Path: The path to the temporary solution file.
+    Fixture para criar e limpar arquivos temporários de solução.
     """
-    solution_code = """print(\"Hello World!\")"""
-    temp_solution = Path("temp_solution_without_input.py")
-    temp_solution.write_text(solution_code)
-    yield temp_solution
-    temp_solution.unlink()  # Cleanup after the test
+    temp_files = []
+
+    def _create_temp_solution(file_name: str, content: str) -> Path:
+        temp_path = Path(file_name)
+        temp_path.write_text(content)
+        temp_files.append(temp_path)
+        return temp_path
+
+    yield _create_temp_solution
+
+    # Cleanup: Remove todos os arquivos criados após o teste
+    for temp_file in temp_files:
+        temp_file.unlink()
 
 
-@pytest.fixture
-def solution_with_input():
-    """
-    Fixture to create a temporary solution that requires input.
+def test_solution_runner_without_arguments(create_temp_solution):
+    solution_code = """print("Hello World!")"""
+    temp_solution = create_temp_solution(
+        "temp_solution_without_input.py", solution_code
+    )
 
-    Returns:
-        Path: The path to the temporary solution file.
-    """
-    solution_code = """n = int(input())\nprint(n * 2)"""
-    temp_solution = Path("temp_solution_with_input.py")
-    temp_solution.write_text(solution_code)
-    yield temp_solution
-    temp_solution.unlink()  # Cleanup after the test
-
-
-def test_solution_runner_without_arguments(solution_without_input):
-    runner = SolutionRunner(solution_without_input)
+    runner = SolutionRunner(temp_solution)
 
     # Test the output without input arguments
     assert runner.run("") == "Hello World!"
 
 
-def test_solution_runner(solution_with_input):
-    runner = SolutionRunner(solution_with_input)
+def test_solution_runner(create_temp_solution):
+    solution_code = """n = int(input())\nprint(n * 2)"""
+    temp_solution = create_temp_solution("temp_solution_with_input.py", solution_code)
+
+    runner = SolutionRunner(temp_solution)
 
     # Test the output for different inputs
     assert runner.run("5") == "10"
