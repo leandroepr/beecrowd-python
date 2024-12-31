@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from .sample_loader import SampleLoader
+from .sample_loader import InvalidMarkdownFormatError, SampleLoader
 
 
 @pytest.fixture
@@ -55,3 +55,22 @@ def test_sample_loader(create_temp_markdown):
         {"input": "-10\n4", "output": "X = -6"},
         {"input": "15\n-7", "output": "X = 8"},
     ]
+
+
+def test_invalid_header_format(create_temp_markdown):
+    markdown_content = """
+    | Invalid Column | Output Sample |
+    | -------------- | ------------- |
+    | 10<br>9        | X = 19        |
+    """
+    temp_markdown = create_temp_markdown("temp_invalid_header.md", markdown_content)
+
+    with pytest.raises(InvalidMarkdownFormatError):
+        loader = SampleLoader(temp_markdown)
+        loader.extract_samples()
+
+
+def test_missing_file():
+    with pytest.raises(FileNotFoundError):
+        loader = SampleLoader("non_existent_file.md")
+        loader.extract_samples()

@@ -1,80 +1,76 @@
-import re
 from pathlib import Path
+from typing import Dict, List
 
 
 class SampleLoader:
-    def __init__(self, markdown_path):
+    def __init__(self, markdown_path: Path):
         """
-        Initializes the SampleLoader.
+        Inicializa o SampleLoader.
 
         Args:
-            markdown_path (str or Path): Path to the Markdown file.
+            markdown_path (Path): Caminho para o arquivo Markdown.
         """
         self.markdown_path = Path(markdown_path)
         if not self.markdown_path.exists():
-            raise FileNotFoundError(f"Markdown file not found: {self.markdown_path}")
+            raise FileNotFoundError(
+                f"Arquivo Markdown não encontrado: {self.markdown_path}"
+            )
 
-    def extract_samples(self):
+    def extract_samples(self) -> List[Dict[str, str]]:
         """
-        Extracts samples from the Markdown file.
+        Extrai samples do arquivo Markdown.
 
         Returns:
-            list of dict: A list of samples in the format:
-                [{"input": "input data", "output": "output data"}, ...]
+            List[Dict[str, str]]: Lista de samples com 'input' e 'output'.
         """
         content = self.markdown_path.read_text()
+        parser = MarkdownParser(content)
+        return parser.parse()
 
-        # Match rows in the table
-        rows = re.findall(r"\|\s*(.*?)\s*\|\s*(.*?)\s*\|", content)
 
+class MarkdownParser:
+    HEADER_ROW = ["Input Sample", "Output Sample"]
+
+    def __init__(self, content: str):
+        self.content = content
+
+    def _validate_header(self, rows: List[str]) -> None:
+        if not rows or self.HEADER_ROW != [
+            col.strip() for col in rows[0].split("|")[1:-1]
+        ]:
+            raise InvalidMarkdownFormatError(
+                "O arquivo Markdown não possui cabeçalhos válidos."
+            )
+
+    def parse(self) -> List[Dict[str, str]]:
+        rows = self.content.strip().split("\n")
+        self._validate_header(rows)
+
+        # Processa linhas do corpo, ignorando cabeçalhos e separadores
+        data_rows = rows[2:]  # Ignora cabeçalhos e separadores
         samples = []
-        input_buffer = []
-        output_buffer = []
 
-        for i, (input_data, output_data) in enumerate(rows):
-            # Skip the header row and separator rows
-            if (
-                i == 0
-                or (
-                    input_data.strip() == "Input Sample"
-                    and output_data.strip() == "Output Sample"
+        for row in data_rows:
+            columns = [col.strip() for col in row.split("|")[1:-1]]
+            if len(columns) == 2:
+                input_data, output_data = columns
+                samples.append(
+                    {
+                        "input": "\n".join(input_data.split("<br>")).strip(),
+                        "output": "\n".join(output_data.split("<br>")).strip(),
+                    }
                 )
-                or (
-                    input_data.strip().startswith("-")
-                    and output_data.strip().startswith("-")
-                )
-            ):
-                continue
-
-            # Handle multi-line input/output split by <br>
-            input_lines = input_data.strip().split("<br>") if input_data.strip() else []
-            output_lines = (
-                output_data.strip().split("<br>") if output_data.strip() else []
-            )
-
-            # If there are both input and output lines, create a sample
-            if input_lines or output_lines:
-                input_buffer.extend(input_lines)
-                output_buffer.extend(output_lines)
-
-                # Append sample and reset buffers when transitioning to a new row
-                if input_lines and output_lines:
-                    samples.append(
-                        {
-                            "input": "\n".join(input_buffer).strip(),
-                            "output": "\n".join(output_buffer).strip(),
-                        }
-                    )
-                    input_buffer.clear()
-                    output_buffer.clear()
-
-        # Add any remaining data as the last sample
-        if input_buffer or output_buffer:
-            samples.append(
-                {
-                    "input": "\n".join(input_buffer).strip(),
-                    "output": "\n".join(output_buffer).strip(),
-                }
-            )
 
         return samples
+
+
+class SampleLoaderError(Exception):
+    """Exceção base para erros no SampleLoader."""
+
+    pass
+
+
+class InvalidMarkdownFormatError(SampleLoaderError):
+    """Exceção para erros de formato no arquivo Markdown."""
+
+    pass
