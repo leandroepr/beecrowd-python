@@ -19,6 +19,20 @@ Este repositório contém soluções para os desafios do Beecrowd, organizadas p
     make install
     ```
 
+### Tabelas de Navegação
+
+-   [Lista Geral de Problemas Resolvidos](docs/all_problems.md)
+-   Listas por Categoria:
+    -   [Beginner](docs/beginner.md)
+    -   [Ad-Hoc](docs/ad_hoc.md)
+    -   [Strings](docs/strings.md)
+    -   [Data Structures and Libraries](docs/data_structures_and_libraries.md)
+    -   [Mathematics](docs/mathematics.md)
+    -   [Paradigms](docs/paradigms.md)
+    -   [Graph](docs/graph.md)
+    -   [Computational Geometry](docs/computational_geometry.md)
+    -   [SQL](docs/sql.md)
+
 ## Estrutura inicial do projeto
 
 ```
@@ -26,6 +40,10 @@ beecrowd_python/
 ├── docs/
 ├── src/
 │   ├── challenges/
+│   │   └── challenge_1000_hello_world
+│   │       ├── CHALLENGE.md
+│   │       ├── solution.py
+│   │       └── test_solution.py
 │   └── utils/
 │       ├── file_reader.py
 │       ├── sample_extractor.py
