@@ -6,37 +6,38 @@ FILTER ?=
 
 # Install project dependencies
 install:
+	$(POETRY) lock --no-update
 	$(POETRY) install --no-root
 
-# Main target to run tests
+# Main target to run tests (all or filtered by the FILTER variable)
 test:
 	@if [ "$(FILTER)" ]; then \
 		echo "Running tests filtered by pattern: $(FILTER)"; \
-		pytest -k $(FILTER) --durations=0 -v; \
+		$(POETRY) run pytest -k $(FILTER) --durations=0 -v; \
 	else \
 		echo "Running all tests"; \
-		pytest --durations=0 -v; \
+		$(POETRY) run pytest --durations=0 -v; \
 	fi
 
-# Target to watch for test changes
+# Target to watch for test changes (all or filtered by the FILTER variable)
 test-watch:
 	@if [ "$(FILTER)" ]; then \
 		echo "Watching tests filtered by pattern: $(FILTER)"; \
-		ptw -- -k $(FILTER) --durations=0 -v; \
+		$(POETRY) run sh -c 'ptw -- --durations=0 -v -k "$(FILTER)"'; \
 	else \
 		echo "Watching all tests"; \
-		ptw -- --durations=0 -v; \
+		$(POETRY) run sh -c 'ptw -- --durations=0 -v'; \
 	fi
 
-# Check code with Flake8 and Isort
+# Lint code using Flake8 and Isort
 lint:
 	$(POETRY) run flake8 .
-	$(POETRY) run isort --check . src
+	$(POETRY) run isort --check .
 
-# Format code with Black and Isort
+# Format code using Black and Isort
 format:
 	$(POETRY) run black .
-	$(POETRY) run isort . src
+	$(POETRY) run isort .
 
 # Update dependencies to their latest versions
 update:
