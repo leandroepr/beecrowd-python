@@ -1,0 +1,35 @@
+name: Test Project
+
+on:
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            # Checkout the repository
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            # Set up Python
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.11"
+
+            # Install dependencies
+            - name: Install dependencies
+              run: |
+                  pip install poetry
+                  poetry install
+
+            # Check code formatting
+            - name: Check code formatting
+              run: make lint
+
+            # Run all tests using the Makefile
+            - name: Run tests
+              run: make test
